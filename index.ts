@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { Agent } from './src/agent';
 import { Store } from './src/store';
-import { v4 as uuidv4 } from 'uuid';
+import cors from 'cors'
 import { IssuanceMessage } from './src/interface/IAgent';
 
 const app = express();
@@ -14,6 +14,7 @@ const store = new Store();
 
 // Middleware
 app.use(bodyParser.json());
+app.use(cors())
 
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
@@ -46,12 +47,7 @@ app.post('/issue', async (req, res) => {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
 
-    let result: IssuanceMessage
-    if(claimValues == "undefined"){
-        result = await agent.issue(targetDID, subjectData, credentialType, undefined, additionalParams);
-    }else{
-        result = await agent.issue(targetDID, subjectData, credentialType, claimValues, additionalParams);
-    }
+    let result = await agent.issue(targetDID, subjectData, credentialType, claimValues, additionalParams);
     
     res.json(result);
 });
