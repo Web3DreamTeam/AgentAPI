@@ -1,0 +1,414 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'Agent API'
+  description: 'API for multitenanted Agent.'
+
+paths:
+  /issue:
+    post:
+      summary: 'Issue a credential to a target DID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                targetDID:
+                  type: string
+                subjectData:
+                  type: object
+                credentialType:
+                  type: string
+                claimValues:
+                  type: object
+                additionalParams:
+                  type: object
+      responses:
+        '200':
+          description: 'Successfully issued the credential'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuanceMessage'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'Server error'
+
+  /request-presentation:
+    post:
+      summary: 'Request a presentation from a target DID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                targetDID:
+                  type: string
+                  example: 'did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67'
+                credentialTypes:
+                  type: array
+                  items:
+                    type: string
+                    example: 'Booking'
+      responses:
+        '200':
+          description: 'Successfully created the presentation request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresentationRequestMessage'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'Server error'
+
+  /present:
+    post:
+      summary: 'Present credentials to a target DID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                targetDID:
+                  type: string
+                  example: 'did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67'
+                credentialTypes:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                        example: 'Booking'
+                claims:
+                  type: array
+                  items:
+                    type: string
+                    example: 'name'
+      responses:
+        '200':
+          description: 'Successfully created the presentation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresentationMessage'
+        '400':
+          description: 'Bad request'
+        '500':
+          description: 'Server error'
+
+  /verify:
+    post:
+      summary: 'Verify a presentation'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                vp:
+                  type: string
+                  example: 'eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJ2cCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVQcmVzZW50YXRpb24iXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5rc2lMQ0owZVhBaU9pSktWMVFpZlEuZXlKbGVIQWlPakUzTURRek5qWXdNREFzSW5aaklqcDdJa0JqYjI1MFpYaDBJanBiSW1oMGRIQnpPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1ERTRMMk55WldSbGJuUnBZV3h6TDNZeElsMHNJblI1Y0dVaU9sc2lWbVZ5YVdacFlXSnNaVU55WldSbGJuUnBZV3dpTENKQ2IyOXJhVzVuSWwwc0ltTnlaV1JsYm5ScFlXeFRkV0pxWldOMElqcDdJbTVoYldVaU9pSktiMmh1SUVSdlpTSXNJbkp2YjIxVWVYQmxJam9pVTNWd1pYSnBiM0lnUkdWc2RYaGxJaXdpWTJobFkydEpiaUk2SWpJd01qUXRNREV0TURGVU1URTZNREE2TURCYUlpd2lZMmhsWTJ0UGRYUWlPaUl5TURJMExUQXhMVEEwVkRFeE9qQXdPakF3V2lJc0ltUmhkR1ZQWmtKcGNuUm9Jam9pTVRrNU9DMHdNUzB3TkNJc0luTnRiMnRsY2lJNlptRnNjMlVzSW1GalkyVnpjMmxpYVd4cGRIbE9aV1ZrY3lJNlptRnNjMlY5ZlN3aWMzVmlJam9pWkdsa09tVjBhSEk2YldGMGFXTnRkVzA2TUhobU16WkRRVEJrTlRVeE4wSkVRVFk0TnpVek1USTJOREUyTUVOall6VmxZV1pCT1VGR1pUVmtJaXdpYm1KbUlqb3hOamsxTXprMk5EVTVMQ0pwYzNNaU9pSmthV1E2WlhSb2NqcHRZWFJwWTIxMWJUb3dlRE14TVVNelFUSXpZVEk1TWpsaE1EYzFNek16TWpCQ1ptUXlOemxDUWpreU9VUTNRelpoWmpnaWZRLkFsVllhTlFGX1BhU091MDlyU1JrRzk0SHRIbVpXQUxKN1dXVUloQ25RcUpRMTJSVEpkVXl1TEozZ3VLcU5RM3RNWmlTUEJaUjZ3Xy1YdkdmNzBJaUh3Il19LCJpc3MiOiJkaWQ6ZXRocjptYXRpY211bToweGYzNkNBMGQ1NTE3QkRBNjg3NTMxMjY0MTYwQ2NjNWVhZkE5QUZlNWQifQ.Gbw9-VXpvR0BA9erGMHhtaFmJVMivTTayN_wNcI1-1atkm94cP2dv1jzlUtQzxKtITkWRpUa4jt_eXtmo8SyYA'
+
+      responses:
+        '200': # Assuming a 200 OK response
+          description: Successful verification response
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/VerificationResponse'
+              example:
+                verified: true
+                payload:
+                  vp:
+                    '@context': ["ExampleContext1", "ExampleContext2"]
+                    type: ["VerifiableCredential", "Booking"]
+                    verifiableCredential: ["OMITTED_FOR_BREVITY"]
+                  iss: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                didResolutionResult:
+                  didDocumentMetadata: {}
+                  didResolutionMetadata:
+                    contentType: 'application/did+ld+json'
+                  didDocument:
+                    '@context': ["ExampleContext1", "ExampleContext2"]
+                    id: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                    verificationMethod: ["ExampleMethod1", "ExampleMethod2"]
+                    authentication: ["ExampleAuth1", "ExampleAuth2"]
+                    assertionMethod: ["ExampleAssertion1", "ExampleAssertion2"]
+                issuer: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                signer:
+                  id: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d#controller'
+                  type: 'EcdsaSecp256k1RecoveryMethod2020'
+                  controller: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                  blockchainAccountId: 'eip155:80001:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                jwt: 'SomeJwtTokenHere'
+                policies:
+                  nbf: null
+                  exp: null
+                  iat: null
+                verifiablePresentation:
+                  verifiableCredential: ["ExampleVC1"]
+                  holder: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+                  type: ['VerifiablePresentation']
+                  '@context': ['https://www.w3.org/2018/credentials/v1']
+                  proof:
+                    type: 'JwtProof2020'
+                    jwt: 'AnotherJwtTokenHere'
+
+  /register:
+    post:
+      summary: 'Register a new agent.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 'Username for the new agent.'
+                  example: 'holder'
+                password:
+                  type: string
+                  format: password
+                  description: 'Password for the new agent.'
+                  example: 'password123'
+      responses:
+        '200':
+          description: 'Successfully registered a new agent and returned a tenant ID.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    type: string
+                    format: string
+                    description: 'The tenant ID assigned to the newly registered agent.'
+                    example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+        '400':
+          description: 'Bad request. Incorrect input format.'
+        '500':
+          description: 'Server error. Could not register the agent.'
+
+  /login:
+    post:
+      summary: 'Login an existing agent.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 'Username of the agent.'
+                  example: 'holder'
+                password:
+                  type: string
+                  format: password
+                  description: 'Password of the agent.'
+                  example: 'password123'
+      responses:
+        '200':
+          description: 'Successfully logged in the agent and returned a tenant ID.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    type: string
+                    format: string
+                    description: 'The tenant ID assigned to the logged-in agent.'
+                    example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
+        '400':
+          description: 'Bad request. Incorrect input format or invalid credentials.'
+        '500':
+          description: 'Server error. Could not log in the agent.'
+
+
+components:
+  schemas:
+    IssuanceMessage:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Issue
+          description: 'The type of message, always "Issue" for this endpoint.'
+        data:
+          type: object
+          properties:
+            target:
+              type: string
+              description: 'DID of the target entity for the issuance.'
+            credential:
+              type: string
+              description: 'JWT representation of the issued credential.'
+            issuer:
+              type: string
+              description: 'DID of the issuer.'
+          required:
+            - target
+            - credential
+            - issuer
+    PresentationRequestMessage:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - PresentationRequest
+          description: 'The type of message, always "PresentationRequest" for this endpoint.'
+        data:
+          type: object
+          properties:
+            target:
+              type: string
+              description: 'DID of the target entity for the presentation request.'
+            credentialTypes:
+              type: array
+              items:
+                type: string
+              description: 'Types of credentials being requested.'
+            verifier:
+              type: string
+              description: 'DID of the verifier.'
+          required:
+            - target
+            - credentialTypes
+            - verifier
+    PresentationMessage:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Presentation
+          description: 'The type of message, always "Presentation" for this endpoint.'
+        data:
+          type: object
+          properties:
+            target:
+              type: string
+              description: 'DID of the target entity for the presentation.'
+            presentation:
+              type: string
+              description: 'JWT representation of the presentation.'
+            holder:
+              type: string
+              description: 'DID of the holder.'
+          required:
+            - target
+            - presentation
+            - holder
+    VerificationResponse:
+      type: object
+      properties:
+        verified:
+          type: boolean
+        payload:
+          type: object
+          properties:
+            vp:
+              type: object
+              properties:
+                '@context':
+                  type: array
+                type:
+                  type: array
+                verifiableCredential:
+                  type: array
+            iss:
+              type: string
+        didResolutionResult:
+          type: object
+          properties:
+            didDocumentMetadata:
+              type: object
+            didResolutionMetadata:
+              type: object
+              properties:
+                contentType:
+                  type: string
+            didDocument:
+              type: object
+              properties:
+                '@context':
+                  type: array
+                id:
+                  type: string
+                verificationMethod:
+                  type: array
+                authentication:
+                  type: array
+                assertionMethod:
+                  type: array
+        issuer:
+          type: string
+        signer:
+          type: object
+          properties:
+            id:
+              type: string
+            type:
+              type: string
+            controller:
+              type: string
+            blockchainAccountId:
+              type: string
+        jwt:
+          type: string
+        policies:
+          type: object
+          properties:
+            nbf:
+              type: string
+              nullable: true
+            exp:
+              type: string
+              nullable: true
+            iat:
+              type: string
+              nullable: true
+        verifiablePresentation:
+          type: object
+          properties:
+            verifiableCredential:
+              type: array
+            holder:
+              type: string
+            type:
+              type: array
+            '@context':
+              type: array
+            proof:
+              type: object
+              properties:
+                type:
+                  type: string
+                jwt:
+                  type: string
