@@ -338,10 +338,16 @@ components:
               properties:
                 '@context':
                   type: array
+                  items:
+                    type: string
                 type:
                   type: array
+                  items:
+                    type: string
                 verifiableCredential:
                   type: array
+                  items:
+                    type: string
             iss:
               type: string
         didResolutionResult:
@@ -359,14 +365,22 @@ components:
               properties:
                 '@context':
                   type: array
+                  items:
+                    type: string
                 id:
                   type: string
                 verificationMethod:
                   type: array
+                  items:
+                    type: string
                 authentication:
                   type: array
+                  items:
+                    type: string
                 assertionMethod:
                   type: array
+                  items:
+                    type: string
         issuer:
           type: string
         signer:
@@ -399,12 +413,18 @@ components:
           properties:
             verifiableCredential:
               type: array
+              items:
+                    type: string
             holder:
               type: string
             type:
               type: array
+              items:
+                    type: string
             '@context':
               type: array
+              items:
+                    type: string
             proof:
               type: object
               properties:
