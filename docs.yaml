@@ -17,16 +17,30 @@ paths:
               properties:
                 did:
                   type: string
+                  example: did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d
                 targetDID:
                   type: string
+                  example: did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67
                 subjectData:
                   type: object
+                  example:
+                    name: John Doe
+                    roomType: Superior Deluxe
+                    checkIn: 2024-01-01T11:00:00Z
+                    checkOut: 2024-01-04T11:00:00Z
+                    dateOfBirth: 1998-01-04
+                    smoker: false
+                    accessibilityNeeds: false
                 credentialType:
                   type: string
+                  example: Booking
                 claimValues:
                   type: object
+                  example: undefined
                 additionalParams:
                   type: object
+                  example:
+                    expirationDate: 2024-01-04T11:00:00Z
       responses:
         '200':
           description: 'Successfully issued the credential'
@@ -265,12 +279,15 @@ components:
             target:
               type: string
               description: 'DID of the target entity for the issuance.'
+              example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
             credential:
               type: string
               description: 'JWT representation of the issued credential.'
+              example: 'eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3MDQzNjYwMDAsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sInR5cGUiOlsiVmVyaWZpYWJsZUNyZWRlbnRpYWwiLCJCb29raW5nIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7Im5hbWUiOiJKb2huIERvZSIsInJvb21UeXBlIjoiU3VwZXJpb3IgRGVsdXhlIiwiY2hlY2tJbiI6IjIwMjQtMDEtMDFUMTE6MDA6MDBaIiwiY2hlY2tPdXQiOiIyMDI0LTAxLTA0VDExOjAwOjAwWiIsImRhdGVPZkJpcnRoIjoiMTk5OC0wMS0wNCIsInNtb2tlciI6ZmFsc2UsImFjY2Vzc2liaWxpdHlOZWVkcyI6ZmFsc2V9fSwic3ViIjoiZGlkOmV0aHI6bWF0aWNtdW06MHhmMzZDQTBkNTUxN0JEQTY4NzUzMTI2NDE2MENjYzVlYWZBOUFGZTVkIiwibmJmIjoxNjk1Mzk2NDU5LCJpc3MiOiJkaWQ6ZXRocjptYXRpY211bToweDMxMUMzQTIzYTI5MjlhMDc1MzMzMjBCZmQyNzlCQjkyOUQ3QzZhZjgifQ.AlVYaNQF_PaSOu09rSRkG94HtHmZWALJ7WWUIhCnQqJQ12RTJdUyuLJ3guKqNQ3tMZiSPBZR6w_-XvGf70IiHw'
             issuer:
               type: string
               description: 'DID of the issuer.'
+              example: 'did:ethr:maticmum:0x311C3A23a2929a07533320Bfd279BB929D7C6af8'
           required:
             - target
             - credential
@@ -289,14 +306,17 @@ components:
             target:
               type: string
               description: 'DID of the target entity for the presentation request.'
+              example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
             credentialTypes:
               type: array
               items:
                 type: string
+                example: 'Booking'
               description: 'Types of credentials being requested.'
             verifier:
               type: string
               description: 'DID of the verifier.'
+              example: 'did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67'
           required:
             - target
             - credentialTypes
@@ -315,12 +335,15 @@ components:
             target:
               type: string
               description: 'DID of the target entity for the presentation.'
+              example: 'did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67'
             presentation:
               type: string
               description: 'JWT representation of the presentation.'
+              example: 'eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJ2cCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVQcmVzZW50YXRpb24iXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5rc2lMQ0owZVhBaU9pSktWMVFpZlEuZXlKbGVIQWlPakUzTURRek5qWXdNREFzSW5aaklqcDdJa0JqYjI1MFpYaDBJanBiSW1oMGRIQnpPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1ERTRMMk55WldSbGJuUnBZV3h6TDNZeElsMHNJblI1Y0dVaU9sc2lWbVZ5YVdacFlXSnNaVU55WldSbGJuUnBZV3dpTENKQ2IyOXJhVzVuSWwwc0ltTnlaV1JsYm5ScFlXeFRkV0pxWldOMElqcDdJbTVoYldVaU9pSktiMmh1SUVSdlpTSXNJbkp2YjIxVWVYQmxJam9pVTNWd1pYSnBiM0lnUkdWc2RYaGxJaXdpWTJobFkydEpiaUk2SWpJd01qUXRNREV0TURGVU1URTZNREE2TURCYUlpd2lZMmhsWTJ0UGRYUWlPaUl5TURJMExUQXhMVEEwVkRFeE9qQXdPakF3V2lJc0ltUmhkR1ZQWmtKcGNuUm9Jam9pTVRrNU9DMHdNUzB3TkNJc0luTnRiMnRsY2lJNlptRnNjMlVzSW1GalkyVnpjMmxpYVd4cGRIbE9aV1ZrY3lJNlptRnNjMlY5ZlN3aWMzVmlJam9pWkdsa09tVjBhSEk2YldGMGFXTnRkVzA2TUhobU16WkRRVEJrTlRVeE4wSkVRVFk0TnpVek1USTJOREUyTUVOall6VmxZV1pCT1VGR1pUVmtJaXdpYm1KbUlqb3hOamsxTXprMk5EVTVMQ0pwYzNNaU9pSmthV1E2WlhSb2NqcHRZWFJwWTIxMWJUb3dlRE14TVVNelFUSXpZVEk1TWpsaE1EYzFNek16TWpCQ1ptUXlOemxDUWpreU9VUTNRelpoWmpnaWZRLkFsVllhTlFGX1BhU091MDlyU1JrRzk0SHRIbVpXQUxKN1dXVUloQ25RcUpRMTJSVEpkVXl1TEozZ3VLcU5RM3RNWmlTUEJaUjZ3Xy1YdkdmNzBJaUh3Il19LCJpc3MiOiJkaWQ6ZXRocjptYXRpY211bToweGYzNkNBMGQ1NTE3QkRBNjg3NTMxMjY0MTYwQ2NjNWVhZkE5QUZlNWQifQ.Gbw9-VXpvR0BA9erGMHhtaFmJVMivTTayN_wNcI1-1atkm94cP2dv1jzlUtQzxKtITkWRpUa4jt_eXtmo8SyYA'
             holder:
               type: string
               description: 'DID of the holder.'
+              example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
           required:
             - target
             - presentation
