@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import { Agent } from './src/agent';
 import { Store } from './src/store';
 import { v4 as uuidv4 } from 'uuid';
+import { IssuanceMessage } from './src/interface/IAgent';
 
 const app = express();
 const PORT = 3000;
@@ -45,7 +46,13 @@ app.post('/issue', async (req, res) => {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
 
-    const result = await agent.issue(targetDID, subjectData, credentialType, claimValues, additionalParams);
+    let result: IssuanceMessage
+    if(claimValues == "undefined"){
+        result = await agent.issue(targetDID, subjectData, credentialType, undefined, additionalParams);
+    }else{
+        result = await agent.issue(targetDID, subjectData, credentialType, claimValues, additionalParams);
+    }
+    
     res.json(result);
 });
 
