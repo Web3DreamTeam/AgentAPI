@@ -14,8 +14,53 @@ interface CredentialRow {
     type: string;
 }
 
+interface PresentationRow {
+    presentation: string;
+}
+
+
 
 export class Store{
+
+    async startSession(uniqueId: any, targetDID: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(`INSERT INTO Verifications (id, target) 
+                            VALUES (?, ?)`, 
+                            [uniqueId, targetDID], 
+                            (err) => {
+                                if (err) reject(err);
+                                resolve();
+                            });
+        })
+    }
+
+    updateSession(id: string, presentation: string): Promise<void> {
+
+        return new Promise((resolve, reject) => {
+            this.db.run(`UPDATE Verifications
+            SET presentation = ?
+            WHERE id = ?`, 
+                            [presentation, id], 
+                            (err) => {
+                                if (err) reject(err);
+                                resolve();
+                            });
+        })
+    }
+    getSession(id: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT presentation FROM Verifications WHERE id = ?`, 
+                        [id], 
+                        (err, row: PresentationRow) => {
+                            console.log(row)
+                            if (err) reject(err);
+                            if (!row) resolve("");
+                            else if (row === undefined) resolve("")
+                            else if (row.presentation == undefined) resolve("")
+                            else resolve(row.presentation);
+                        });
+        });
+    }
 
     db
 
@@ -54,6 +99,15 @@ export class Store{
                         publicKey TEXT NOT NULL,
                         privateKey TEXT NOT NULL,
                         PRIMARY KEY(did)
+                    );
+                `);
+
+                await this.createTable(`
+                    CREATE TABLE IF NOT EXISTS Verifications (
+                        id TEXT NOT NULL UNIQUE,
+                        target TEXT NOT NULL,
+                        presentation TEXT,
+                        PRIMARY KEY(id)
                     );
                 `);
     
@@ -171,6 +225,8 @@ export class Store{
             });
         });
     }
+
+    
 
 
 

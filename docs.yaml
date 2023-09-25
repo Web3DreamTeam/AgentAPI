@@ -141,8 +141,12 @@ paths:
                   example: 'did:ethr:maticmum:0xf36CA0d5517BDA687531264160Ccc5eafA9AFe5d'
                 vp:
                   type: string
+                  description: 'Optional VP string for verification (need to provide one or the other)'
                   example: 'eyJhbGciOiJFUzI1NksiLCJ0eXAiOiJKV1QifQ.eyJ2cCI6eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvMjAxOC9jcmVkZW50aWFscy92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVQcmVzZW50YXRpb24iXSwidmVyaWZpYWJsZUNyZWRlbnRpYWwiOlsiZXlKaGJHY2lPaUpGVXpJMU5rc2lMQ0owZVhBaU9pSktWMVFpZlEuZXlKbGVIQWlPakUzTURRek5qWXdNREFzSW5aaklqcDdJa0JqYjI1MFpYaDBJanBiSW1oMGRIQnpPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1ERTRMMk55WldSbGJuUnBZV3h6TDNZeElsMHNJblI1Y0dVaU9sc2lWbVZ5YVdacFlXSnNaVU55WldSbGJuUnBZV3dpTENKQ2IyOXJhVzVuSWwwc0ltTnlaV1JsYm5ScFlXeFRkV0pxWldOMElqcDdJbTVoYldVaU9pSktiMmh1SUVSdlpTSXNJbkp2YjIxVWVYQmxJam9pVTNWd1pYSnBiM0lnUkdWc2RYaGxJaXdpWTJobFkydEpiaUk2SWpJd01qUXRNREV0TURGVU1URTZNREE2TURCYUlpd2lZMmhsWTJ0UGRYUWlPaUl5TURJMExUQXhMVEEwVkRFeE9qQXdPakF3V2lJc0ltUmhkR1ZQWmtKcGNuUm9Jam9pTVRrNU9DMHdNUzB3TkNJc0luTnRiMnRsY2lJNlptRnNjMlVzSW1GalkyVnpjMmxpYVd4cGRIbE9aV1ZrY3lJNlptRnNjMlY5ZlN3aWMzVmlJam9pWkdsa09tVjBhSEk2YldGMGFXTnRkVzA2TUhobU16WkRRVEJrTlRVeE4wSkVRVFk0TnpVek1USTJOREUyTUVOall6VmxZV1pCT1VGR1pUVmtJaXdpYm1KbUlqb3hOamsxTXprMk5EVTVMQ0pwYzNNaU9pSmthV1E2WlhSb2NqcHRZWFJwWTIxMWJUb3dlRE14TVVNelFUSXpZVEk1TWpsaE1EYzFNek16TWpCQ1ptUXlOemxDUWpreU9VUTNRelpoWmpnaWZRLkFsVllhTlFGX1BhU091MDlyU1JrRzk0SHRIbVpXQUxKN1dXVUloQ25RcUpRMTJSVEpkVXl1TEozZ3VLcU5RM3RNWmlTUEJaUjZ3Xy1YdkdmNzBJaUh3Il19LCJpc3MiOiJkaWQ6ZXRocjptYXRpY211bToweGYzNkNBMGQ1NTE3QkRBNjg3NTMxMjY0MTYwQ2NjNWVhZkE5QUZlNWQifQ.Gbw9-VXpvR0BA9erGMHhtaFmJVMivTTayN_wNcI1-1atkm94cP2dv1jzlUtQzxKtITkWRpUa4jt_eXtmo8SyYA'
-
+                id:
+                  type: string
+                  description: 'Optional Unique ID for callback (need to provide one or the other)'
+                  example: 'abc2313241'
       responses:
         '200': # Assuming a 200 OK response
           description: Successful verification response
@@ -317,6 +321,10 @@ components:
               type: string
               description: 'DID of the verifier.'
               example: 'did:ethr:maticmum:0x75Fe2875a193E816aF2C1beAe13C13EBa2941d67'
+            id:
+              type: string
+              description: 'Unique ID for callback'
+              example: 'abc2313241'
           required:
             - target
             - credentialTypes

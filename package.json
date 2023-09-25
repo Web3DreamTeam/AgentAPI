@@ -25,6 +25,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.14"
+    "@types/cors": "^2.8.14",
+    "@types/uuid": "^9.0.4"
   }
 }

@@ -16,7 +16,8 @@ export interface PresentationRequestMessage {
     data: {
         target: string,
         credentialTypes: string[],
-        verifier: string
+        verifier: string,
+        id: string,
     }
 }
 

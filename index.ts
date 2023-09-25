@@ -10,7 +10,8 @@ const PORT = 3000;
 
 // Using a Map to manage multiple Agent instances
 const agents: Map<string, Agent> = new Map();
-const store = new Store();
+const store = new Store("test.sqlite");
+store.init()
 
 // Middleware
 app.use(bodyParser.json());
@@ -65,16 +66,37 @@ app.post('/request-presentation', async (req, res) => {
     res.json(result);
 });
 
-// Present credentials to a target DID
-app.post('/present', async (req, res) => {
-    const { did, targetDID, credentialTypes, claims } = req.body;
+app.post('/request-presentation-status', async (req, res) => {
+    const { did, id } = req.body;
     const agent = agents.get(did);
 
     if (!agent) {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
 
-    const result = await agent.present(targetDID, credentialTypes, claims);
+    const result = await agent.requestPresentationStatus(id);
+    res.json(result);
+});
+
+// Present credentials to a target DID
+app.post('/present', async (req, res) => {
+    const { did, targetDID, credentials, credentialTypes, claims, id } = req.body;
+    const agent = agents.get(did);
+
+    if (!agent) {
+        return res.status(404).json({ message: 'Agent not found for this tenant.' });
+    }
+
+    if (credentialTypes === undefined && credentials == undefined){
+        return res.status(400).json({ message: "Must provide an array of types to search from or an array of JWTs to present" })
+    }
+    let result
+
+    if(credentialTypes === undefined){
+        result = await agent.presentVCs(targetDID, credentials, claims, id);
+    }else if(credentials === undefined){
+        result = await agent.present(targetDID, credentialTypes, claims, id);
+    }
     res.json(result);
 });
 
@@ -90,6 +112,16 @@ app.post('/verify', async (req, res) => {
     const result = await agent.verify(vp);
     res.json(result);
 });
+
+app.post('/save', async (req,res) => {
+    const {did, vc} = req.body
+    const agent = agents.get(did)
+    if (!agent) {
+        return res.status(404).json({ message: 'Agent not found for this tenant.' });
+    }
+    await agent.save(vc)
+    res.send(200)
+})
 
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);

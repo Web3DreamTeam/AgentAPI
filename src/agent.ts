@@ -6,6 +6,7 @@ import { Resolver } from 'did-resolver'
 import { Store } from './store';
 import { unescapeLeadingUnderscores } from 'typescript';
 import { IAgent, IssuanceMessage, PresentationMessage, PresentationRequestMessage } from './interface/IAgent';
+import { v4 as uuidv4 } from 'uuid';
 
 interface myCredential {
     jwt: JWT,
@@ -16,6 +17,7 @@ interface myCredential {
 
 
 export class Agent implements IAgent {
+    
     private didWithKeys!: DIDWithKeys;
     public did!: DID;
     private JWTService: JWTService
@@ -61,15 +63,22 @@ export class Agent implements IAgent {
     }
 
     async requestPresentation(targetDID: DID, credentialTypes: string[]): Promise<PresentationRequestMessage>{
+        let uniqueId = uuidv4()
+        this.store.startSession(uniqueId, targetDID)
         return {
             "type": "PresentationRequest",
             "data": {
                 "target": targetDID,
                 "credentialTypes": credentialTypes,
-                "verifier": this.did
+                "verifier": this.did,
+                "id": uniqueId
             }
             
         }
+    }
+
+    async requestPresentationStatus(id: string): Promise<string>{
+        return await this.store.getSession(id)
     }
 
     async issue(targetDID:DID, subjectData:CredentialSubject, credentialType: string, claimValues?: CredentialSubject, additionalParams?:Partial<CredentialPayload> ):Promise<IssuanceMessage>{
@@ -83,25 +92,57 @@ export class Agent implements IAgent {
         }
     }
 
-    async present(targetDID: DID, credentialTypes: string | string[], claims?: string[]): Promise<PresentationMessage>{
+    async present(targetDID: DID, credentialTypes: string | string[], claims?: string[], id?: string): Promise<PresentationMessage>{
 
         let sd = false
         if(claims !== undefined) sd = true
         if(typeof credentialTypes == "string" && !sd) credentialTypes = [credentialTypes]
 
+        let presentation = sd ?  await this.createPresentationSDJWT(credentialTypes as string, claims!) : await this.createPresentationJWT(credentialTypes as string[])
+        if(id !== undefined){
+            this.store.updateSession(id, presentation)
+        }
 
         return {
             "type": "Presentation",
             "data": {
                 "target": targetDID,
-                "presentation":  sd ?  await this.createPresentationSDJWT(credentialTypes as string, claims!) : await this.createPresentationJWT(credentialTypes as string[]),
+                "presentation": presentation, 
                 "holder": this.did
             }
         }
     }
 
-    async verify(vp:string){
-        return await verifyPresentationJWT(vp, this.didResolver)
+    async presentVCs(targetDID: any, credentials: any, claims: any, id: any): Promise<PresentationMessage> {
+        let sd = false
+        if(claims !== undefined) sd = true
+
+        console.log(sd)
+        console.log(credentials)
+
+        let presentation = sd ? await this.createPresentationFromSDJWT(credentials[0] as string, claims!) : await this.createPresentationFromJWT(credentials as string[])
+        if(id !== undefined){
+            this.store.updateSession(id, presentation)
+        }
+
+        return {
+            "type": "Presentation",
+            "data": {
+                "target": targetDID,
+                "presentation": presentation, 
+                "holder": this.did
+            }
+        }
+    }
+
+    async verify(vp?:string, id?: string){
+
+        if (vp === undefined && id === undefined) throw("Need to provide either a VP JWT or a verification ID")
+        if (vp === undefined){
+            vp = await this.store.getSession(id!)
+        }
+        console.log(vp)
+        return await this.verifyPresentationJWT(vp)
     }
 
     async save(jwt: JWT){ 
@@ -192,6 +233,10 @@ export class Agent implements IAgent {
         return await createAndSignPresentationJWT(this.didWithKeys, vcs.map(elem => elem.jwt))
     }
 
+    async createPresentationFromJWT(credentials: string[]){
+        return await createAndSignPresentationJWT(this.didWithKeys, credentials)
+    }
+
     // private findCredentialTypeinJWT(jwt: JWT, acceptableTypes: string[]): boolean{
     //     let jwtCredentialPayload: JwtCredentialPayload;;
     //     try{
@@ -259,17 +304,18 @@ export class Agent implements IAgent {
         return await createAndSignPresentationSDJWT(this.didWithKeys, vcs[0].jwt, claims)
     }
 
-    async createPresentationFromJwtSDJWT(credential: string, claims: string[]){
+    async createPresentationFromSDJWT(credential: string, claims: string[]){
         return await createAndSignPresentationSDJWT(this.didWithKeys, credential, claims)
     }
 
     async verifyPresentationJWT(vp: JWT){
-        return await verifyPresentationJWT(vp, this.didResolver)
+        let res = await verifyPresentationJWT(vp, this.didResolver)
+        return res
     }
 
     async verifyPresentationSDJWT(vp: JWT){
-        return await verifyPresentationSDJWT(vp, this.didResolver)
-        
+        let res = await verifyPresentationSDJWT(vp, this.didResolver)
+        return res
     }
     
 }
