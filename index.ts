@@ -6,7 +6,7 @@ import cors from 'cors'
 import { IssuanceMessage } from './src/interface/IAgent';
 
 const app = express();
-const PORT = 3000;
+const PORT = 8000;
 
 // Using a Map to manage multiple Agent instances
 const agents: Map<string, Agent> = new Map();
@@ -120,7 +120,18 @@ app.post('/save', async (req,res) => {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
     await agent.save(vc)
-    res.send(200)
+    res.sendStatus(200)
+})
+
+app.get('/get-credentials/:did', async (req,res) => {
+    const did = req.params.did
+    const agent = agents.get(did)
+
+    if (!agent) {
+        return res.status(404).json({ message: 'Agent not found for this tenant.' });
+    }
+    let creds = await agent.getCredentials()
+    res.send(creds)
 })
 
 app.listen(PORT, () => {
