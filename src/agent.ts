@@ -8,6 +8,9 @@ import { unescapeLeadingUnderscores } from 'typescript';
 import { IAgent, IssuanceMessage, PresentationMessage, PresentationRequestMessage } from './interface/IAgent';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ethers } from 'ethers';
+import { provider } from '../constants';
+
 interface myCredential {
     jwt: JWT,
     cred: JwtCredentialPayload,
@@ -317,5 +320,35 @@ export class Agent implements IAgent {
         let res = await verifyPresentationSDJWT(vp, this.didResolver)
         return res
     }
+
+    // evm methods
+    getAddress(did:string) {
+        // any evm address starts with 0x
+        return `0x`+did.split("0x")[1]; 
+    }
+    async getBalance(did: string) {
+        const address = this.getAddress(did); 
+
+        const balance = await provider.getBalance(address); 
+        const ethBalance = ethers.utils.formatEther(balance); 
+
+        return ethBalance; 
+    }
+
+    async sendEth(targetDID:string, value:string) {
+        const to = this.getAddress(targetDID); 
+        // instantiate ethers wallet
+        const wallet = new ethers.Wallet(this.didWithKeys.keyPair.privateKey,provider);
+        // send eth to target DID
+        const res = await wallet.sendTransaction(
+        {
+            to: this.getAddress(targetDID),
+            value:ethers.utils.parseEther(value)
+        }); 
+        // wait for the transaction to be confirmed
+        const receipt = await res.wait(); 
+
+        return receipt; 
+    }   
     
 }

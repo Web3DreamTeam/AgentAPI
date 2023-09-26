@@ -177,6 +177,59 @@ app.get('/get-credentials/:did', async (req,res) => {
         )
 })
 
+app.get('/get-balance/:did', async (req,res) => {
+    const did = req.params.did; 
+    const agent = agents.get(did); 
+
+    if(!agent) {
+        return res.status(404).json({message: 'Agent not found for this tenant.'}); 
+    }
+
+    let balance = await agent.getBalance(did); 
+
+    res.send(
+        {
+            balance:balance
+        }
+    )
+})
+
+app.get('/get-address/:did', async (req,res) => {
+    const did = req.params.did; 
+    const agent = agents.get(did); 
+
+    if(!agent) {
+        return res.status(404).json({message: 'Agent not found for this tenant.'}); 
+    }
+
+    let address = agent.getAddress(did); 
+
+    res.send(
+        {
+            address:address
+        }
+    )
+})
+
+app.post('/send-eth', async (req,res) => {
+    const {did, targetDID,value} = req.body; 
+    const agent = agents.get(did); 
+
+    if(!agent) {
+        return res.status(404).json({message: 'Agent not found for this tenant.'}); 
+    }
+
+    let receipt = await agent.sendEth(targetDID, value); 
+
+    res.send(
+        {
+            receipt:receipt
+        }
+    )
+})
+
+
+
 app.listen(PORT, () => {
     console.log(`Server started on http://localhost:${PORT}`);
 });
