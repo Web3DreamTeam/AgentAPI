@@ -3,19 +3,37 @@ import bodyParser from 'body-parser';
 import { Agent } from './src/agent';
 import { Store } from './src/store';
 import cors from 'cors'
-import { IssuanceMessage } from './src/interface/IAgent';
+import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
 const PORT = 8000;
 
 // Using a Map to manage multiple Agent instances
 const agents: Map<string, Agent> = new Map();
+const qrCodes: Map<string, string> = new Map();
 const store = new Store("test.sqlite");
 store.init()
 
 // Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors())
+app.use(express.urlencoded({ extended: true }));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.get('/fetch/:uuid', (req,res) => {
+    let uuid = req.params.uuid
+    let response = qrCodes.get(uuid)
+
+    if(!response){
+        return res.status(404).json({message: 'Request not found'})
+    }
+
+    res.json(JSON.parse(response))
+})
 
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
@@ -49,8 +67,14 @@ app.post('/issue', async (req, res) => {
     }
 
     let result = await agent.issue(targetDID, subjectData, credentialType, claimValues, additionalParams);
+
+    let id = uuidv4()
+    qrCodes.set(id, JSON.stringify(result))
     
-    res.json(result);
+    res.json({
+        ...result,
+        qrcodeurl: "http://localhost:8000/fetch/"+id
+    });
 });
 
 // Request a presentation from a target DID
@@ -63,7 +87,14 @@ app.post('/request-presentation', async (req, res) => {
     }
 
     const result = await agent.requestPresentation(targetDID, credentialTypes);
-    res.json(result);
+
+    let id = uuidv4()
+    qrCodes.set(id, JSON.stringify(result))
+
+    res.json({
+        ...result,
+        qrcodeurl: "http://localhost:8000/fetch/"+id
+    });
 });
 
 app.post('/request-presentation-status', async (req, res) => {
@@ -97,7 +128,15 @@ app.post('/present', async (req, res) => {
     }else if(credentials === undefined){
         result = await agent.present(targetDID, credentialTypes, claims, id);
     }
-    res.json(result);
+
+    let uuid = uuidv4()
+    qrCodes.set(uuid, JSON.stringify(result))
+
+
+    res.json({
+        ...result,
+        qrcodeurl: "http://localhost:8000/fetch/"+uuid
+    });
 });
 
 // Verify a presentation
@@ -131,7 +170,11 @@ app.get('/get-credentials/:did', async (req,res) => {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
     let creds = await agent.getCredentials()
-    res.send(creds)
+    res.send(
+        {
+            credentials: creds
+        }
+        )
 })
 
 app.listen(PORT, () => {
