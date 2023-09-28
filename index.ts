@@ -153,6 +153,7 @@ app.post('/verify', async (req, res) => {
 });
 
 app.post('/save', async (req,res) => {
+    console.log(req.body)
     const {did, vc} = req.body
     const agent = agents.get(did)
     if (!agent) {

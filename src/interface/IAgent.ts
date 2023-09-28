@@ -35,7 +35,7 @@ export interface IAgent {
     register(username: string, password: string): Promise<void>;
     requestPresentation(targetDID: string, credentialTypes: string[]): Promise<PresentationRequestMessage>;
     issue(targetDID: string, subjectData: CredentialSubject, credentialType: string, claimValues?: CredentialSubject, additionalParams?: Partial<CredentialPayload>): Promise<IssuanceMessage>;
-    present(targetDID: string, credentialTypes: string | string[], claims?: string[]): Promise<PresentationMessage>;
+    present(targetDID: string, credentialTypes:string[], claims?: string[][]): Promise<PresentationMessage>;
     verify(vp: string): Promise<any>; // Specify the return type based on what verifyPresentationJWT returns
     save(jwt: string): void; // Define the type for JWT if it's different from string
 }
