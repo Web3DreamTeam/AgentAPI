@@ -335,20 +335,25 @@ export class Agent implements IAgent {
         return ethBalance; 
     }
 
+    // TODO: change name, because it will send whatever is the native currency of the network, not only eth
     async sendEth(targetDID:string, value:string) {
         const to = this.getAddress(targetDID); 
         // instantiate ethers wallet
-        const wallet = new ethers.Wallet(this.didWithKeys.keyPair.privateKey,provider);
-        // send eth to target DID
-        const res = await wallet.sendTransaction(
-        {
-            to: this.getAddress(targetDID),
-            value:ethers.utils.parseEther(value)
-        }); 
-        // wait for the transaction to be confirmed
-        const receipt = await res.wait(); 
+        try{
+                const wallet = new ethers.Wallet(this.didWithKeys.keyPair.privateKey,provider);
+            // send eth to target DID
+            const res = await wallet.sendTransaction(
+            {
+                to: this.getAddress(targetDID),
+                value:ethers.utils.parseEther(value)
+            }); 
+            // wait for the transaction to be confirmed
+            const receipt = await res.wait(); 
 
-        return receipt; 
+            return receipt;
+        } catch(error) {
+            return error.message; 
+        } 
     }   
     
 }
