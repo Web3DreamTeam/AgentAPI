@@ -26,7 +26,8 @@ export interface PresentationMessage {
     data: {
         target: string,
         presentation: string,
-        holder: string
+        holder: string,
+        id: string
     }
 }
 

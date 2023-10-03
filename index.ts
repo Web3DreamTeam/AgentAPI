@@ -148,14 +148,23 @@ app.post('/present', async (req, res) => {
 
 // Verify a presentation
 app.post('/verify', async (req, res) => {
-    const { did, vp } = req.body; // vp: Verifiable Presentation in JWT format
+    const { did, vp, id } = req.body; // vp: Verifiable Presentation in JWT format
     const agent = agents.get(did);
 
     if (!agent) {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
+    let result
 
-    const result = await agent.verify(vp);
+
+    if(id !== undefined){
+        let storedRes = await agent.store.getSession(id)
+        if(storedRes === undefined) return res.status(404).json({message: 'Presentation not found for id ', id})
+        result = await agent.verify(storedRes);
+    }else{
+        result = await agent.verify(vp);
+    }
+
     res.json(result);
 });
 

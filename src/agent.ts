@@ -93,6 +93,8 @@ export class Agent implements IAgent {
     }
 
     async present(targetDID: DID, credentialTypes: string[], claims?: string[][], id?: string): Promise<PresentationMessage>{
+        
+        
 
         let sd = false
         if(claims !== undefined) sd = true
@@ -101,6 +103,11 @@ export class Agent implements IAgent {
         let presentation = sd ?  await this.createPresentationSDJWT(credentialTypes as string[], claims!) : await this.createPresentationJWT(credentialTypes as string[])
         if(id !== undefined){
             this.store.updateSession(id, presentation)
+        }else{
+            let uniqueId = uuidv4()
+            this.store.startSession(uniqueId, this.did)
+            this.store.updateSession(uniqueId, presentation)
+            id = uniqueId
         }
 
         return {
@@ -108,7 +115,8 @@ export class Agent implements IAgent {
             "data": {
                 "target": targetDID,
                 "presentation": presentation, 
-                "holder": this.did
+                "holder": this.did,
+                "id": id
             }
         }
     }
@@ -123,6 +131,11 @@ export class Agent implements IAgent {
         let presentation = sd ? await this.createPresentationFromSDJWT(credentials as string[], claims!) : await this.createPresentationFromJWT(credentials as string[])
         if(id !== undefined){
             this.store.updateSession(id, presentation)
+        }else{
+            let uniqueId = uuidv4()
+            this.store.startSession(uniqueId, this.did)
+            this.store.updateSession(uniqueId, presentation)
+            id = uniqueId
         }
 
         return {
@@ -130,7 +143,8 @@ export class Agent implements IAgent {
             "data": {
                 "target": targetDID,
                 "presentation": presentation, 
-                "holder": this.did
+                "holder": this.did,
+                "id": id
             }
         }
     }
