@@ -35,6 +35,13 @@ app.get('/fetch/:uuid', (req,res) => {
     res.json(JSON.parse(response))
 })
 
+app.get('/discover/:username', async (req,res ) => {
+    const username = req.params.username
+    let _did = await store.resolveUsername(username)
+    res.json({did: _did})
+    
+})
+
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
@@ -153,7 +160,6 @@ app.post('/verify', async (req, res) => {
 });
 
 app.post('/save', async (req,res) => {
-    console.log(req.body)
     const {did, vc} = req.body
     const agent = agents.get(did)
     if (!agent) {
@@ -161,6 +167,17 @@ app.post('/save', async (req,res) => {
     }
     await agent.save(vc)
     res.sendStatus(200)
+})
+
+app.post('/delete', async (req,res) => {
+    const {did, vc} = req.body
+    const agent = agents.get(did)
+    if (!agent) {
+        return res.status(404).json({ message: 'Agent not found for this tenant.' });
+    }
+    await agent.delete(vc)
+    res.sendStatus(200)
+
 })
 
 app.get('/get-credentials/:did', async (req,res) => {

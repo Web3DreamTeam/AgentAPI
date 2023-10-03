@@ -151,6 +151,14 @@ export class Agent implements IAgent {
         this.store.saveCredential(this.did, jwt, type)
     }
 
+    async delete(jwt: JWT){
+        this.store.deleteCredential(this.did, jwt)
+    }
+
+    async resolveUsername(did: string){
+        return this.store.resolveUsername(did)
+    }
+
     // .
     // .
     // .

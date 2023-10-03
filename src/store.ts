@@ -2,10 +2,12 @@ import { Database, OPEN_CREATE } from "sqlite3";
 import { DIDWithKeys, KEY_ALG, KeyPair } from "@jpmorganchase/onyx-ssi-sdk";
 
 interface AccountRow {
-    algorithm: KEY_ALG;
-    publicKey: string;
-    privateKey: string;
-    did: string;
+    username?: string;
+    password?: string;
+    algorithm?: KEY_ALG;
+    publicKey?: string;
+    privateKey?: string;
+    did?: string;
 }
 
 interface CredentialRow {
@@ -151,6 +153,16 @@ export class Store{
             });
         });
     }
+
+    resolveUsername(username: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT did FROM Accounts WHERE username = ?`, [username], (err, row: AccountRow) => {
+                if (err) reject(err);
+                if(!row) resolve('')
+                else resolve(row.did!);  // Returns true if a row is found, otherwise false.
+            });
+        });
+    }
     
 
     register(username: string, password: string, did: string, didWithKeys: DIDWithKeys): Promise<void> {
@@ -185,11 +197,11 @@ export class Store{
                             console.log(row)
                             
                             const keyPair: KeyPair = {
-                                algorithm: row.algorithm,
-                                publicKey: row.publicKey,
-                                privateKey: row.privateKey
+                                algorithm: row.algorithm!,
+                                publicKey: row.publicKey!,
+                                privateKey: row.privateKey!
                             };
-                            resolve({ did: row.did, keyPair });
+                            resolve({ did: row.did!, keyPair });
                         });
         });
     }
@@ -198,6 +210,15 @@ export class Store{
         let sd = (jwt.indexOf("~") != -1)
         return new Promise((resolve, reject) => {
             this.db.run(`INSERT INTO Credentials (did, jwt, sd, type) VALUES (?, ?, ?, ?)`, [did, jwt, sd, type], (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    deleteCredential(did: string, jwt: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(`DELETE FROM Credentials WHERE did = ? AND jwt = ?`, [did, jwt], (err) => {
                 if (err) reject(err);
                 resolve();
             });
