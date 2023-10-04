@@ -44,10 +44,10 @@ app.get('/discover/:username', async (req,res ) => {
 
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, type=undefined } = req.body;
 
     const agent = new Agent(store);
-    await agent.register(username, password);
+    await agent.register(username, password, type);
     agents.set(agent.did, agent);
 
     res.json({ did: agent.did });

@@ -1,4 +1,4 @@
-import { EthrDIDMethod,verifyDisclosures, DIDWithKeys, JWT, createAndSignCredentialJWT, DID, CredentialSubject, createAndSignPresentationJWT, verifyPresentationJWT,verifyPresentationSDJWT, JWTService, createAndSignCredentialSDJWT, createAndSignPresentationSDJWT } from '@jpmorganchase/onyx-ssi-sdk'
+import { EthrDIDMethod,verifyDisclosures, DIDWithKeys, JWT, createAndSignCredentialJWT, DID, CredentialSubject, createAndSignPresentationJWT, verifyPresentationJWT,verifyPresentationSDJWT, JWTService, createAndSignCredentialSDJWT, createAndSignPresentationSDJWT, KeyDIDMethod } from '@jpmorganchase/onyx-ssi-sdk'
 import { CredentialPayload, JwtCredentialPayload } from 'did-jwt-vc';
 import { getResolver as getKeyResolver} from 'key-did-resolver';
 import { getResolver as getEthrResolver } from 'ethr-did-resolver';
@@ -47,17 +47,23 @@ export class Agent implements IAgent {
             this.did = this.didWithKeys.did
         } else {
             // throw("User not found")
-            this.register(username, password)
+            this.register(username, password, "ethr")
         }
         
     }
 
-    async register(username: string, password: string){
+    async register(username: string, password: string, type:string){
         if(await this.store.usernameExists(username)){
             throw("User already exists")
         }
-        let didEthrProvider = new EthrDIDMethod(this.ethrProvider)
-        this.didWithKeys = await didEthrProvider.create()
+        if(type == "ethr"){
+            let didEthrProvider = new EthrDIDMethod(this.ethrProvider)
+            this.didWithKeys = await didEthrProvider.create()
+        }else if(type == "key"){
+            let didKeyProvider = new KeyDIDMethod()
+            this.didWithKeys = await didKeyProvider.create()
+        }
+        
         this.did = this.didWithKeys.did
         this.store.register(username, password, this.did, this.didWithKeys)
     }

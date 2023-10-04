@@ -33,7 +33,7 @@ export interface PresentationMessage {
 
 export interface IAgent {
     login(username: string, password: string): Promise<void>;
-    register(username: string, password: string): Promise<void>;
+    register(username: string, password: string, type:string): Promise<void>;
     requestPresentation(targetDID: string, credentialTypes: string[]): Promise<PresentationRequestMessage>;
     issue(targetDID: string, subjectData: CredentialSubject, credentialType: string, claimValues?: CredentialSubject, additionalParams?: Partial<CredentialPayload>): Promise<IssuanceMessage>;
     present(targetDID: string, credentialTypes:string[], claims?: string[][]): Promise<PresentationMessage>;
