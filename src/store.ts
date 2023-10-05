@@ -2,6 +2,12 @@ import { Database, OPEN_CREATE } from "sqlite3";
 import { DIDWithKeys, KEY_ALG, KeyPair } from "@jpmorganchase/onyx-ssi-sdk";
 import { v4 as uuidv4 } from "uuid";
 
+interface LoginInfo {
+  did?: string;
+  username?: string;
+  password?: string;
+}
+
 interface AccountRow {
   username?: string;
   password?: string;
@@ -31,51 +37,6 @@ interface VerifiedParticipantRow {
 }
 
 export class Store {
-  async startSession(uniqueId: any, targetDID: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        `INSERT INTO Verifications (id, target) 
-                            VALUES (?, ?)`,
-        [uniqueId, targetDID],
-        (err) => {
-          if (err) reject(err);
-          resolve();
-        }
-      );
-    });
-  }
-
-  updateSession(id: string, presentation: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        `UPDATE Verifications
-            SET presentation = ?
-            WHERE id = ?`,
-        [presentation, id],
-        (err) => {
-          if (err) reject(err);
-          resolve();
-        }
-      );
-    });
-  }
-  getSession(id: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.db.get(
-        `SELECT presentation FROM Verifications WHERE id = ?`,
-        [id],
-        (err, row: PresentationRow) => {
-          console.log(row);
-          if (err) reject(err);
-          if (!row) resolve("");
-          else if (row === undefined) resolve("");
-          else if (row.presentation == undefined) resolve("");
-          else resolve(row.presentation);
-        }
-      );
-    });
-  }
-
   db;
 
   constructor(filename?: string) {
@@ -143,6 +104,51 @@ export class Store {
     });
   }
 
+  async startSession(uniqueId: any, targetDID: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO Verifications (id, target) 
+                            VALUES (?, ?)`,
+        [uniqueId, targetDID],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
+    });
+  }
+
+  updateSession(id: string, presentation: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `UPDATE Verifications
+            SET presentation = ?
+            WHERE id = ?`,
+        [presentation, id],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        }
+      );
+    });
+  }
+  getSession(id: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        `SELECT presentation FROM Verifications WHERE id = ?`,
+        [id],
+        (err, row: PresentationRow) => {
+          console.log(row);
+          if (err) reject(err);
+          if (!row) resolve("");
+          else if (row === undefined) resolve("");
+          else if (row.presentation == undefined) resolve("");
+          else resolve(row.presentation);
+        }
+      );
+    });
+  }
+
   private createTable(sql: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(sql, (err) => {
@@ -171,6 +177,7 @@ export class Store {
         [username],
         (err, row) => {
           if (err) reject(err);
+
           resolve(!!row); // Returns true if a row is found, otherwise false.
         }
       );
@@ -198,18 +205,13 @@ export class Store {
     didWithKeys: DIDWithKeys
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      console.log(typeof didWithKeys.keyPair.publicKey);
-      // const publicKey = (typeof didWithKeys.keyPair.publicKey === 'string')
-      //     ? new TextEncoder().encode(didWithKeys.keyPair.publicKey)
-      //     : didWithKeys.keyPair.publicKey;
-
-      // const privateKey = (typeof didWithKeys.keyPair.privateKey === 'string')
-      //     ? new TextEncoder().encode(didWithKeys.keyPair.privateKey)
-      //     : didWithKeys.keyPair.privateKey;
+      console.log("register method ", typeof didWithKeys.keyPair.publicKey);
 
       this.db.run(
-        `INSERT INTO Accounts (username, password, did, algorithm, publicKey, privateKey) 
+        `INSERT INTO Accounts (username, password, did, algorithm, publicKey, privateKey)
+
                          VALUES (?, ?, ?, ?, ?, ?)`,
+
         [
           username,
           password,
@@ -218,8 +220,10 @@ export class Store {
           didWithKeys.keyPair.publicKey,
           didWithKeys.keyPair.privateKey,
         ],
+
         (err) => {
           if (err) reject(err);
+
           resolve();
         }
       );
@@ -243,6 +247,26 @@ export class Store {
             privateKey: row.privateKey!,
           };
           resolve({ did: row.did!, keyPair });
+        }
+      );
+    });
+  }
+
+  async fetchAgents(): Promise<LoginInfo[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        `SELECT did, username, password FROM Accounts;`,
+        (err, rows: AccountRow[]) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          const agents = rows.map((row) => ({
+            did: row.did,
+            username: row.username,
+            password: row.password,
+          }));
+          resolve(agents);
         }
       );
     });

@@ -27,6 +27,24 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.get("/health", async (req, res) => {
+  if (agents.size == 0) {
+    let logins = await store.fetchAgents();
+    console.log(logins);
+    logins.forEach((login) => {
+      let agent = new Agent(store);
+      if (login.did && login.username && login.password) {
+        agent.login(login.username, login.password);
+        agents.set(login.did, agent);
+      }
+    });
+    res.sendStatus(201);
+    console.log("health method ", agents);
+  } else {
+    res.sendStatus(200);
+  }
+});
+
 app.get("/fetch/:uuid", (req, res) => {
   let uuid = req.params.uuid;
   let response = qrCodes.get(uuid);
