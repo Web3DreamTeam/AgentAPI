@@ -14,6 +14,9 @@ const qrCodes: Map<string, string> = new Map();
 const store = new Store("test.sqlite");
 store.init()
 
+
+
+
 // Middleware
 app.use(express.json());
 app.use(cors())
@@ -23,6 +26,25 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.get('/health', async (req,res) => {
+    if(agents.size == 0){
+        let logins = await store.fetchAgents()
+        console.log(logins)
+        logins.forEach(login => {
+            let agent = new Agent(store)
+            if(login.did && login.username && login.password){
+                agent.login(login.username, login.password)
+                agents.set(login.did, agent)
+            }
+        });
+        res.sendStatus(201)
+        console.log('health method ', agents)
+        
+    }else{
+        res.sendStatus(200)
+    }
+})
 
 app.get('/fetch/:uuid', (req,res) => {
     let uuid = req.params.uuid
