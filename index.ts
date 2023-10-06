@@ -178,14 +178,20 @@ app.post('/verify', async (req, res) => {
     }
     let result
 
+    try{
+        if(id !== undefined){
+            let storedRes = await agent.store.getSession(id)
+            console.log('storedRes', storedRes)
+            if(storedRes === '') return res.status(404).json({message: 'Presentation not found for id ', id})
+            result = await agent.verify(storedRes);
+        }else{
+            result = await agent.verify(vp);
+        }
 
-    if(id !== undefined){
-        let storedRes = await agent.store.getSession(id)
-        if(storedRes === undefined) return res.status(404).json({message: 'Presentation not found for id ', id})
-        result = await agent.verify(storedRes);
-    }else{
-        result = await agent.verify(vp);
+    }catch{
+        res.status(500).json({message: 'There was an error processing the VP, please check the id and the vp being passed in'})
     }
+    
 
     res.json(result);
 });

@@ -179,13 +179,6 @@ export class Store{
     register(username: string, password: string, did: string, didWithKeys: DIDWithKeys): Promise<void> {
         return new Promise((resolve, reject) => {
             console.log('register method ', typeof didWithKeys.keyPair.publicKey)
-            // const publicKey = (typeof didWithKeys.keyPair.publicKey === 'string')
-            //     ? new TextEncoder().encode(didWithKeys.keyPair.publicKey)
-            //     : didWithKeys.keyPair.publicKey;
-                
-            // const privateKey = (typeof didWithKeys.keyPair.privateKey === 'string')
-            //     ? new TextEncoder().encode(didWithKeys.keyPair.privateKey)
-            //     : didWithKeys.keyPair.privateKey;
 
             this.db.run(`INSERT INTO Accounts (username, password, did, algorithm, publicKey, privateKey) 
                          VALUES (?, ?, ?, ?, ?, ?)`, 
