@@ -12,7 +12,7 @@ const PORT = 8000;
 // Using a Map to manage multiple Agent instances
 const agents: Map<string, Agent> = new Map();
 const qrCodes: Map<string, string> = new Map();
-const store = new Store("blankdemo.sqlite");
+const store = new Store("test.sqlite");
 store.init();
 
 // Middleware
