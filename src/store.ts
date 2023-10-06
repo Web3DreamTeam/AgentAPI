@@ -1,11 +1,19 @@
 import { Database, OPEN_CREATE } from "sqlite3";
 import { DIDWithKeys, KEY_ALG, KeyPair } from "@jpmorganchase/onyx-ssi-sdk";
 
+interface LoginInfo {
+    did?: string;
+    username?: string;
+    password?: string;
+}
+
 interface AccountRow {
-    algorithm: KEY_ALG;
-    publicKey: string;
-    privateKey: string;
-    did: string;
+    username?: string;
+    password?: string;
+    algorithm?: KEY_ALG;
+    publicKey?: string;
+    privateKey?: string;
+    did?: string;
 }
 
 interface CredentialRow {
@@ -22,46 +30,6 @@ interface PresentationRow {
 
 export class Store{
 
-    async startSession(uniqueId: any, targetDID: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.db.run(`INSERT INTO Verifications (id, target) 
-                            VALUES (?, ?)`, 
-                            [uniqueId, targetDID], 
-                            (err) => {
-                                if (err) reject(err);
-                                resolve();
-                            });
-        })
-    }
-
-    updateSession(id: string, presentation: string): Promise<void> {
-
-        return new Promise((resolve, reject) => {
-            this.db.run(`UPDATE Verifications
-            SET presentation = ?
-            WHERE id = ?`, 
-                            [presentation, id], 
-                            (err) => {
-                                if (err) reject(err);
-                                resolve();
-                            });
-        })
-    }
-    getSession(id: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            this.db.get(`SELECT presentation FROM Verifications WHERE id = ?`, 
-                        [id], 
-                        (err, row: PresentationRow) => {
-                            console.log(row)
-                            if (err) reject(err);
-                            if (!row) resolve("");
-                            else if (row === undefined) resolve("")
-                            else if (row.presentation == undefined) resolve("")
-                            else resolve(row.presentation);
-                        });
-        });
-    }
-
     db
 
     constructor(filename?: string){
@@ -73,9 +41,11 @@ export class Store{
         
     }
 
+
     close(){
         this.db.close()
     }
+
 
     async init(): Promise<void> {
         return new Promise(async (resolve, reject) => {
@@ -117,6 +87,49 @@ export class Store{
             }
         });
     }
+
+
+
+    async startSession(uniqueId: any, targetDID: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(`INSERT INTO Verifications (id, target) 
+                            VALUES (?, ?)`, 
+                            [uniqueId, targetDID], 
+                            (err) => {
+                                if (err) reject(err);
+                                resolve();
+                            });
+        })
+    }
+
+    updateSession(id: string, presentation: string): Promise<void> {
+
+        return new Promise((resolve, reject) => {
+            this.db.run(`UPDATE Verifications
+            SET presentation = ?
+            WHERE id = ?`, 
+                            [presentation, id], 
+                            (err) => {
+                                if (err) reject(err);
+                                resolve();
+                            });
+        })
+    }
+    getSession(id: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT presentation FROM Verifications WHERE id = ?`, 
+                        [id], 
+                        (err, row: PresentationRow) => {
+                            console.log(row)
+                            if (err) reject(err);
+                            if (!row) resolve("");
+                            else if (row === undefined) resolve("")
+                            else if (row.presentation == undefined) resolve("")
+                            else resolve(row.presentation);
+                        });
+        });
+    }
+
     
     private createTable(sql: string): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -151,11 +164,21 @@ export class Store{
             });
         });
     }
+
+    resolveUsername(username: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.db.get(`SELECT did FROM Accounts WHERE username = ?`, [username], (err, row: AccountRow) => {
+                if (err) reject(err);
+                if(!row) resolve('')
+                else resolve(row.did!);  // Returns true if a row is found, otherwise false.
+            });
+        });
+    }
     
 
     register(username: string, password: string, did: string, didWithKeys: DIDWithKeys): Promise<void> {
         return new Promise((resolve, reject) => {
-            console.log(typeof didWithKeys.keyPair.publicKey)
+            console.log('register method ', typeof didWithKeys.keyPair.publicKey)
             // const publicKey = (typeof didWithKeys.keyPair.publicKey === 'string')
             //     ? new TextEncoder().encode(didWithKeys.keyPair.publicKey)
             //     : didWithKeys.keyPair.publicKey;
@@ -182,22 +205,50 @@ export class Store{
                             if (err) reject(err);
                             if (!row) reject(new Error("Invalid credentials"));
 
-                            console.log(row)
+                            console.log('login method', row)
                             
                             const keyPair: KeyPair = {
-                                algorithm: row.algorithm,
-                                publicKey: row.publicKey,
-                                privateKey: row.privateKey
+                                algorithm: row.algorithm!,
+                                publicKey: row.publicKey!,
+                                privateKey: row.privateKey!
                             };
-                            resolve({ did: row.did, keyPair });
+                            resolve({ did: row.did!, keyPair });
                         });
         });
     }
+
+    async fetchAgents(): Promise<LoginInfo[]> {
+        return new Promise((resolve, reject) => {
+            this.db.all(`SELECT did, username, password FROM Accounts;`, 
+                (err, rows: AccountRow[]) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    const agents = rows.map(row => ({
+                        did: row.did,
+                        username: row.username,
+                        password: row.password
+                    }));
+                    resolve(agents);
+                });
+        });
+    }
+    
 
     saveCredential(did: string, jwt: string, type: string): Promise<void> {
         let sd = (jwt.indexOf("~") != -1)
         return new Promise((resolve, reject) => {
             this.db.run(`INSERT INTO Credentials (did, jwt, sd, type) VALUES (?, ?, ?, ?)`, [did, jwt, sd, type], (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    deleteCredential(did: string, jwt: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(`DELETE FROM Credentials WHERE did = ? AND jwt = ?`, [did, jwt], (err) => {
                 if (err) reject(err);
                 resolve();
             });

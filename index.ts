@@ -15,6 +15,9 @@ const qrCodes: Map<string, string> = new Map();
 const store = new Store("test.sqlite");
 store.init()
 
+
+
+
 // Middleware
 app.use(express.json());
 app.use(cors())
@@ -24,6 +27,25 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.get('/health', async (req,res) => {
+    if(agents.size == 0){
+        let logins = await store.fetchAgents()
+        console.log(logins)
+        logins.forEach(login => {
+            let agent = new Agent(store)
+            if(login.did && login.username && login.password){
+                agent.login(login.username, login.password)
+                agents.set(login.did, agent)
+            }
+        });
+        res.sendStatus(201)
+        console.log('health method ', agents)
+        
+    }else{
+        res.sendStatus(200)
+    }
+})
 
 app.get('/fetch/:uuid', (req,res) => {
     let uuid = req.params.uuid
@@ -36,12 +58,19 @@ app.get('/fetch/:uuid', (req,res) => {
     res.json(JSON.parse(response))
 })
 
+app.get('/discover/:username', async (req,res ) => {
+    const username = req.params.username
+    let _did = await store.resolveUsername(username)
+    res.json({did: _did})
+    
+})
+
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, type=undefined } = req.body;
 
     const agent = new Agent(store);
-    await agent.register(username, password);
+    await agent.register(username, password, type);
     agents.set(agent.did, agent);
 
     res.json({ did: agent.did });
@@ -142,14 +171,23 @@ app.post('/present', async (req, res) => {
 
 // Verify a presentation
 app.post('/verify', async (req, res) => {
-    const { did, vp } = req.body; // vp: Verifiable Presentation in JWT format
+    const { did, vp, id } = req.body; // vp: Verifiable Presentation in JWT format
     const agent = agents.get(did);
 
     if (!agent) {
         return res.status(404).json({ message: 'Agent not found for this tenant.' });
     }
+    let result
 
-    const result = await agent.verify(vp);
+
+    if(id !== undefined){
+        let storedRes = await agent.store.getSession(id)
+        if(storedRes === undefined) return res.status(404).json({message: 'Presentation not found for id ', id})
+        result = await agent.verify(storedRes);
+    }else{
+        result = await agent.verify(vp);
+    }
+
     res.json(result);
 });
 
@@ -161,6 +199,17 @@ app.post('/save', async (req,res) => {
     }
     await agent.save(vc)
     res.sendStatus(200)
+})
+
+app.post('/delete', async (req,res) => {
+    const {did, vc} = req.body
+    const agent = agents.get(did)
+    if (!agent) {
+        return res.status(404).json({ message: 'Agent not found for this tenant.' });
+    }
+    await agent.delete(vc)
+    res.sendStatus(200)
+
 })
 
 app.get('/get-credentials/:did', async (req,res) => {

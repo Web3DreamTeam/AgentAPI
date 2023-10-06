@@ -1,4 +1,4 @@
-import { EthrDIDMethod,verifyDisclosures, DIDWithKeys, JWT, createAndSignCredentialJWT, DID, CredentialSubject, createAndSignPresentationJWT, verifyPresentationJWT,verifyPresentationSDJWT, JWTService, createAndSignCredentialSDJWT, createAndSignPresentationSDJWT } from '@jpmorganchase/onyx-ssi-sdk'
+import { EthrDIDMethod,verifyDisclosures, DIDWithKeys, JWT, createAndSignCredentialJWT, DID, CredentialSubject, createAndSignPresentationJWT, verifyPresentationJWT,verifyPresentationSDJWT, JWTService, createAndSignCredentialSDJWT, createAndSignPresentationSDJWT, KeyDIDMethod } from '@jpmorganchase/onyx-ssi-sdk'
 import { CredentialPayload, JwtCredentialPayload } from 'did-jwt-vc';
 import { getResolver as getKeyResolver} from 'key-did-resolver';
 import { getResolver as getEthrResolver } from 'ethr-did-resolver';
@@ -25,7 +25,7 @@ export class Agent implements IAgent {
     
     private didWithKeys!: DIDWithKeys;
     public did!: DID;
-    private JWTService: JWTService
+    private jwtService: JWTService
     didResolver;
     store:Store
 
@@ -42,7 +42,7 @@ export class Agent implements IAgent {
             ...ethrResolver, 
             ...keyResolver})
         
-        this.JWTService = new JWTService()
+        this.jwtService = new JWTService()
         this.store = store
     }
 
@@ -52,17 +52,23 @@ export class Agent implements IAgent {
             this.did = this.didWithKeys.did
         } else {
             // throw("User not found")
-            this.register(username, password)
+            this.register(username, password, "ethr")
         }
         
     }
 
-    async register(username: string, password: string){
+    async register(username: string, password: string, type:string){
         if(await this.store.usernameExists(username)){
             throw("User already exists")
         }
-        let didEthrProvider = new EthrDIDMethod(this.ethrProvider)
-        this.didWithKeys = await didEthrProvider.create()
+        if(type == "ethr"){
+            let didEthrProvider = new EthrDIDMethod(this.ethrProvider)
+            this.didWithKeys = await didEthrProvider.create()
+        }else if(type == "key"){
+            let didKeyProvider = new KeyDIDMethod()
+            this.didWithKeys = await didKeyProvider.create()
+        }
+        
         this.did = this.didWithKeys.did
         this.store.register(username, password, this.did, this.didWithKeys)
     }
@@ -97,15 +103,22 @@ export class Agent implements IAgent {
         }
     }
 
-    async present(targetDID: DID, credentialTypes: string | string[], claims?: string[], id?: string): Promise<PresentationMessage>{
+    async present(targetDID: DID, credentialTypes: string[], claims?: string[][], id?: string): Promise<PresentationMessage>{
+        
+        
 
         let sd = false
         if(claims !== undefined) sd = true
         if(typeof credentialTypes == "string" && !sd) credentialTypes = [credentialTypes]
 
-        let presentation = sd ?  await this.createPresentationSDJWT(credentialTypes as string, claims!) : await this.createPresentationJWT(credentialTypes as string[])
+        let presentation = sd ?  await this.createPresentationSDJWT(credentialTypes as string[], claims!) : await this.createPresentationJWT(credentialTypes as string[])
         if(id !== undefined){
             this.store.updateSession(id, presentation)
+        }else{
+            let uniqueId = uuidv4()
+            this.store.startSession(uniqueId, this.did)
+            this.store.updateSession(uniqueId, presentation)
+            id = uniqueId
         }
 
         return {
@@ -113,7 +126,8 @@ export class Agent implements IAgent {
             "data": {
                 "target": targetDID,
                 "presentation": presentation, 
-                "holder": this.did
+                "holder": this.did,
+                "id": id
             }
         }
     }
@@ -125,9 +139,14 @@ export class Agent implements IAgent {
         console.log(sd)
         console.log(credentials)
 
-        let presentation = sd ? await this.createPresentationFromSDJWT(credentials[0] as string, claims!) : await this.createPresentationFromJWT(credentials as string[])
+        let presentation = sd ? await this.createPresentationFromSDJWT(credentials as string[], claims!) : await this.createPresentationFromJWT(credentials as string[])
         if(id !== undefined){
             this.store.updateSession(id, presentation)
+        }else{
+            let uniqueId = uuidv4()
+            this.store.startSession(uniqueId, this.did)
+            this.store.updateSession(uniqueId, presentation)
+            id = uniqueId
         }
 
         return {
@@ -135,7 +154,8 @@ export class Agent implements IAgent {
             "data": {
                 "target": targetDID,
                 "presentation": presentation, 
-                "holder": this.did
+                "holder": this.did,
+                "id": id
             }
         }
     }
@@ -147,12 +167,21 @@ export class Agent implements IAgent {
             vp = await this.store.getSession(id!)
         }
         console.log(vp)
+        if(vp.indexOf("~") !== -1) return await this.verifyPresentationSDJWT(vp)
         return await this.verifyPresentationJWT(vp)
     }
 
     async save(jwt: JWT){ 
         let type = this.extractCredentialType(jwt)
         this.store.saveCredential(this.did, jwt, type)
+    }
+
+    async delete(jwt: JWT){
+        this.store.deleteCredential(this.did, jwt)
+    }
+
+    async resolveUsername(did: string){
+        return this.store.resolveUsername(did)
     }
 
     // .
@@ -181,7 +210,7 @@ export class Agent implements IAgent {
 
     extractCredentialType(jwt: string): string {
         if(jwt.indexOf("~") != 1) jwt = jwt.split('~')[0]
-        let payload = this.JWTService.decodeJWT(jwt)!.payload as JwtCredentialPayload
+        let payload = this.jwtService.decodeJWT(jwt)!.payload as JwtCredentialPayload
         let arr = payload.vc.type as string[]
 
         for (const item of arr) {
@@ -202,7 +231,7 @@ export class Agent implements IAgent {
             jwts.forEach(cred => {
                 credentials.push({
                     jwt: cred.jwt,
-                    cred: this.JWTService.decodeJWT(cred.jwt)!.payload as JwtCredentialPayload
+                    cred: this.jwtService.decodeJWT(cred.jwt)!.payload as JwtCredentialPayload
                 })
             });
         }
@@ -210,7 +239,7 @@ export class Agent implements IAgent {
         if (sdjwts.length > 0){
             sdjwts.forEach(async cred => {
                 let jwt = cred.jwt.split('~')[0]
-                let baseCred = this.JWTService.decodeJWT(jwt)!.payload as JwtCredentialPayload
+                let baseCred = this.jwtService.decodeJWT(jwt)!.payload as JwtCredentialPayload
                 let disclosures = cred.jwt.split('~').splice(1)
                 let disclosedClaims = await verifyDisclosures(disclosures, baseCred.vc._sd_alg, baseCred.vc.credentialSubject._sd)
                 credentials.push({
@@ -281,7 +310,7 @@ export class Agent implements IAgent {
 
     extractCredentialfromJWT(jwt:JWT): JwtCredentialPayload{
         let jwtCredentialPayload: JwtCredentialPayload;
-        let cred = this.JWTService.decodeJWT(jwt)
+        let cred = this.jwtService.decodeJWT(jwt)
         if (cred == null) throw("Invalid JWT")
         let json = cred.payload
         if (typeof json == 'string') jwtCredentialPayload = JSON.parse(json) as JwtCredentialPayload
@@ -293,7 +322,7 @@ export class Agent implements IAgent {
         let parts = sdjwt.split('~')
         let jwt = parts[0]
         let jwtCredentialPayload: JwtCredentialPayload;
-        let cred = this.JWTService.decodeJWT(jwt)
+        let cred = this.jwtService.decodeJWT(jwt)
         if (cred == null) throw("Invalid JWT")
         let json = cred.payload
         if (typeof json == 'string') jwtCredentialPayload = JSON.parse(json) as JwtCredentialPayload
@@ -303,23 +332,37 @@ export class Agent implements IAgent {
         return {jwtCredentialPayload, disclosures}
     }
 
-    async createPresentationSDJWT(credentialType: string, claims: string[]){
-        let vcs = await this.store.fetchAllCredentials(this.did, credentialType)
+    async createPresentationSDJWT(credentialTypes: string[], claims: string[][]){
+        let vcs = await this.store.fetchAllCredentials(this.did, credentialTypes)
         if (vcs.length == 0) throw("Can't find credential of this type")
-        return await createAndSignPresentationSDJWT(this.didWithKeys, vcs[0].jwt, claims)
+        return await createAndSignPresentationSDJWT(this.didWithKeys, vcs.map(elem => elem.jwt), claims)
     }
 
-    async createPresentationFromSDJWT(credential: string, claims: string[]){
-        return await createAndSignPresentationSDJWT(this.didWithKeys, credential, claims)
+    async createPresentationFromSDJWT(credentials: string[], claims: string[][]){
+        console.log(credentials)
+        console.log(claims)
+        return await createAndSignPresentationSDJWT(this.didWithKeys, credentials, claims)
     }
 
     async verifyPresentationJWT(vp: JWT){
         let res = await verifyPresentationJWT(vp, this.didResolver)
+        // let decodedVcs: JwtCredentialPayload[] = []
+        // res.payload.vp.verifiableCredential.forEach((vc:string) => {
+        //     decodedVcs.push(this.jwtService.decodeJWT(vc)!.payload as JwtCredentialPayload)
+        // });
+
+        // res.payload.vp.verifiableCredential = decodedVcs
         return res
     }
 
     async verifyPresentationSDJWT(vp: JWT){
         let res = await verifyPresentationSDJWT(vp, this.didResolver)
+        // let decodedVcs: JwtCredentialPayload[] = []
+        // res.vp.payload.vp.verifiableCredential.forEach((vc:string) => {
+        //     decodedVcs.push(this.jwtService.decodeJWT(vc)!.payload as JwtCredentialPayload)
+        // });
+
+        // res.vp.payload.vp.verifiableCredential = decodedVcs
         return res
     }
 
