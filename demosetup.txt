@@ -1,0 +1,303 @@
+------Logins:
+
+User:
+shelby
+123
+did:ethr:maticmum:0xb97eA7867625F7C7d6652cA5Dfc28B532ECCCbeB
+
+JPMorgan:
+jpm
+123
+did:ethr:maticmum:0xB5D075aF2503D7b5bFDC95db0489d541db408406
+https://i.ibb.co/0qWX9Nt/jpmlogo.png
+
+Morgan Stanley:
+ms
+123
+did:ethr:maticmum:0x918f570c01Ab4a927DE04027BC6D06584C2d0f08
+https://i.ibb.co/ZNT3gCM/image-4.png
+
+CVS:
+cvs
+123
+did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5
+https://i.ibb.co/xjLTGKD/cvs.png
+
+Pfizer:
+pfizer
+123
+did:ethr:maticmum:0xF7333121BF9FB0D1ee60dcD8b25e426cC990342D
+https://i.ibb.co/YT7k7z8/image-5.png
+
+U.S. Government:
+usgov
+123
+did:ethr:maticmum:0x702FcA53e19267adaEf3B9209D294ec4F950a5F5
+https://i.ibb.co/J2k62gZ/image-6.png
+
+Chevron
+chevron
+123
+did:ethr:maticmum:0x207C8E245950cC6a33325f503117d749F0083D80
+https://i.ibb.co/b2D0tLJ/image-7.png
+
+
+New York State Government:
+nyc
+123
+did:ethr:maticmum:0x099d9A019E8997e8a7331D58853E0D5F3dE0CA20
+https://i.ibb.co/0J1rNrR/image-8.png
+
+
+Random Buyer:
+random
+123
+did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c
+
+------Credentials:
+
+Shelby has the following credentials:
+Utility Contract issued by Chevron (trusted)
+Employment Contract issued by the U.S. Government (trusted)
+Passport issued by the U.S. Government (trusted)
+Proof of Humanity Credential by the U.S. Government (trusted)
+
+CVS has the following credentials:
+Business License issued by State of New York Government (trusted)
+A number of receipts issued by a random untrusted issuer
+
+
+Pfizer has the following credentials:
+Business License issued by State of New York Government (trusted)
+A number of receipts issued by a random untrusted issuer
+
+
+
+-- Issue bodies
+
+{
+    "did": "did:ethr:maticmum:0x207C8E245950cC6a33325f503117d749F0083D80",
+    "targetDID": "did:ethr:maticmum:0xb97eA7867625F7C7d6652cA5Dfc28B532ECCCbeB",
+    "subjectData": {
+        "emailAddress": "shelby@gmail.com",
+        "phoneNumber": "+1(707)8555895",
+        "startDate": "2023-01-01T00:00:00.000Z",
+        "endDate": "2024-01-01T00:00:00.000Z",
+        "accountHolderName": "Shelby Thooson",
+        "accountHolderAddress": "19 North Bohemia Lane, Jamaica, NY 11434",
+        "accountNumber":"chv1234",
+        "companyName":"Chevron"
+    },
+    "credentialType": "UtilityBillCredential",
+    "additionalParams": {
+        "expiryDate": "2024-01-01T00:00:00.000Z",
+        "issueDate": "2023-01-01T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x702FcA53e19267adaEf3B9209D294ec4F950a5F5",
+    "targetDID": "did:ethr:maticmum:0xb97eA7867625F7C7d6652cA5Dfc28B532ECCCbeB",
+    "subjectData": {
+        "firstName": "Shelby",
+        "lastName": "Thooson",
+        "startDate" : "2015-01-01T00:00:00.000Z",
+        "jobTitle":"Dutch Ambassador",
+        "employerName":"U.S. Government",
+        "employerAddress":"1600 Pennsylvania Avenue NW, Washington, DC 20500",
+        "salary":"10000000USD"
+    },
+    "claimValues": {
+        "startDate" : "2015-01-01T00:00:00.000Z",
+        "jobTitle":"Dutch Ambassador",
+        "employerName":"U.S. Government",
+        "employerAddress":"1600 Pennsylvania Avenue NW, Washington, DC 20500",
+        "salary":"10000000USD"
+    },
+    "credentialType": "EmploymentCredential",
+    "additionalParams": {
+        "expiryDate": "2030-01-01T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x702FcA53e19267adaEf3B9209D294ec4F950a5F5",
+    "targetDID": "did:ethr:maticmum:0xb97eA7867625F7C7d6652cA5Dfc28B532ECCCbeB",
+    "subjectData": {
+        "firstName": "Shelby",
+        "lastName": "Thooson",
+        "issueDate" : "2015-01-01",
+        "expiryDate":"2035-01-01",
+        "dateOfBirth":"1995-05-30",
+        "nationality":"United States of America",
+        "issuanceCountry":"United States of America",
+        "passportNumber":"48484990"
+    },
+    "claimValues": {
+        "issueDate" : "2015-01-01",
+        "expiryDate":"2035-01-01",
+        "dateOfBirth":"1995-05-30",
+        "nationality":"United States of America",
+        "issuanceCountry":"United States of America",
+        "passportNumber":"48484990"
+    },
+    "credentialType": "PassportCredential",
+    "additionalParams": {
+        "expiryDate": "2035-01-01T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x702FcA53e19267adaEf3B9209D294ec4F950a5F5",
+    "targetDID": "did:ethr:maticmum:0xb97eA7867625F7C7d6652cA5Dfc28B532ECCCbeB",
+    "subjectData": {
+        "id":"32873823hd2d8d",
+        "isHuman": "True"
+    },
+    "credentialType": "ProofOfHumanity",
+    "additionalParams": {
+        "expiryDate": "2024-06-06T00:00:00.000Z",
+        "issueDate": "2023-01-01T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x099d9A019E8997e8a7331D58853E0D5F3dE0CA20",
+    "targetDID": "did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5",
+    "subjectData": {
+        "businessLegalName":"Consumer Value Store",
+        "taxIdentificationNumber": "4734293422",
+        "issueDate":"2022-06-06T00:00:00.000Z",
+        "licenseNumber":"CVS1000453",
+        "mailingAddress":"9067 Saxton St., New York, NY 10011",
+        "city":"New York City",
+        "zipCode":"10003"
+    },
+    "credentialType": "BusinessLicenseCredential",
+    "additionalParams": {
+        "expiryDate": "2024-06-06T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x099d9A019E8997e8a7331D58853E0D5F3dE0CA20",
+    "targetDID": "did:ethr:maticmum:0xF7333121BF9FB0D1ee60dcD8b25e426cC990342D",
+    "subjectData": {
+        "businessLegalName":"Pfizer Inc.",
+        "taxIdentificationNumber": "8930287436",
+        "issueDate":"2023-02-08T00:00:00.000Z",
+        "licenseNumber":"PFZ1304453",
+        "mailingAddress":"7788 Locust Rd., Brooklyn, NY 11219",
+        "city":"New York City",
+        "zipCode":"10007"
+    },
+    "credentialType": "BusinessLicenseCredential",
+    "additionalParams": {
+        "expiryDate": "2025-02-08T00:00:00.000Z"
+    }
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5",
+    "subjectData": {
+        "id":"3yf3h9f93c3",
+        "receiptNumber": "4734293422",
+        "date":"2022-06-06T00:00:00.000Z",
+        "paymentMethod":"Card",
+        "shipToCompanyName":"Lee's Pharmacy",
+        "sellerCompanyName":"Consumer Value Store",
+        "total":"200000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5",
+    "subjectData": {
+        "id": "4yf4h2b94c2",
+        "receiptNumber": "6734293428",
+        "date": "2022-06-08T00:00:00.000Z",
+        "paymentMethod": "Bank Transfer",
+        "shipToCompanyName": "Consumer Value Store",
+        "sellerCompanyName": "John's Medicines",
+        "total": "215000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5",
+    "subjectData": {
+        "id": "5yf5h3c95d3",
+        "receiptNumber": "7734293420",
+        "date": "2022-06-09T00:00:00.000Z",
+        "paymentMethod": "Check",
+        "shipToCompanyName": "Hillside Drugs",
+        "sellerCompanyName": "Consumer Value Store",
+        "total": "220000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xCAe64BDE453Ccb32E64A87C73FD1ce60371828d5",
+    "subjectData": {
+        "id": "6yf6h4d96e4",
+        "receiptNumber": "8734293423",
+        "date": "2022-06-10T00:00:00.000Z",
+        "paymentMethod": "Paypal",
+        "shipToCompanyName": "Consumer Value Store",
+        "sellerCompanyName": "Urban Pharmacies",
+        "total": "225000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xF7333121BF9FB0D1ee60dcD8b25e426cC990342D",
+    "subjectData": {
+        "id": "1kz4g7a91b2",
+        "receiptNumber": "5835293485",
+        "date": "2022-07-05T00:00:00.000Z",
+        "paymentMethod": "Card",
+        "shipToCompanyName": "Lee's Pharmacy",
+        "sellerCompanyName": "Pfizer Inc.",
+        "total": "240000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xF7333121BF9FB0D1ee60dcD8b25e426cC990342D",
+    "subjectData": {
+        "id": "2lz5h8b92c3",
+        "receiptNumber": "6836293498",
+        "date": "2022-07-06T00:00:00.000Z",
+        "paymentMethod": "Cash",
+        "shipToCompanyName": "Pfizer Inc.",
+        "sellerCompanyName": "City Medicines",
+        "total": "245000USD"
+    },
+    "credentialType": "Receipt"
+}
+
+{
+    "did": "did:ethr:maticmum:0x130af1429A2505588f5fb648292827f616a0509c",
+    "targetDID": "did:ethr:maticmum:0xF7333121BF9FB0D1ee60dcD8b25e426cC990342D",
+    "subjectData": {
+        "id": "3mz6i9c93d4",
+        "receiptNumber": "7837293400",
+        "date": "2022-07-07T00:00:00.000Z",
+        "paymentMethod": "Bank Transfer",
+        "shipToCompanyName": "Ridge Drugs",
+        "sellerCompanyName": "Pfizer Inc.",
+        "total": "250000USD"
+    },
+    "credentialType": "Receipt"
+}

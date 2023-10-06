@@ -12,7 +12,7 @@ const PORT = 8000;
 // Using a Map to manage multiple Agent instances
 const agents: Map<string, Agent> = new Map();
 const qrCodes: Map<string, string> = new Map();
-const store = new Store("test.sqlite");
+const store = new Store("blankdemo.sqlite");
 store.init();
 
 // Middleware
@@ -65,7 +65,7 @@ app.get("/discover/:username", async (req, res) => {
 
 // Register a new agent for a tenant
 app.post("/register", async (req, res) => {
-  const { username, password, type = undefined } = req.body;
+  const { username, password, type = "ethr" } = req.body;
 
   const agent = new Agent(store);
   await agent.register(username, password, type);
