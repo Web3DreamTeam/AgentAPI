@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ethers } from 'ethers';
 import { provider } from '../constants';
+import { TransactionDetails } from './interface/ITransactions';
+import { ReceiptCredential } from './interface/ISchemas';
 
 interface myCredential {
     jwt: JWT,
@@ -351,9 +353,21 @@ export class Agent implements IAgent {
             const receipt = await res.wait(); 
 
             return receipt;
-        } catch(error) {
+        } catch(error:any) {
             return error.message; 
         } 
-    }   
+    }
     
+    async transactWithReceipt(transactionDetails: TransactionDetails) {
+        //extract data
+        const {did, targetDID, value} = transactionDetails; 
+        //perform transaction
+        const txReceipt:ethers.providers.TransactionReceipt = await this.sendEth(targetDID,value);
+        // populate receipt VC data
+        const receiptCredentialData:ReceiptCredential = {id:txReceipt.transactionHash, date:Date.now().toString(), paymentMethod: "crypto", buyer:did, seller: targetDID, total:value} 
+        // issue receipt VC
+        const receiptVC = await this.issue(did, receiptCredentialData, "ReceiptCredential",undefined,undefined); 
+    
+        return receiptVC; 
+    }
 }

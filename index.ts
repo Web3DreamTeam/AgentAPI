@@ -4,6 +4,7 @@ import { Agent } from './src/agent';
 import { Store } from './src/store';
 import cors from 'cors'
 import { v4 as uuidv4 } from 'uuid';
+import { TransactionDetails } from './src/interface/ITransactions';
 
 const app = express();
 const PORT = 8000;
@@ -211,21 +212,24 @@ app.get('/get-address/:did', async (req,res) => {
     )
 })
 
-app.post('/send-eth', async (req,res) => {
-    const {did, targetDID,value} = req.body; 
-    const agent = agents.get(did); 
+app.post('/transact-with-receipt', async (req,res) => {
+    const txDetails:TransactionDetails = req.body; 
+    const agent = agents.get(txDetails.did); 
 
     if(!agent) {
         return res.status(404).json({message: 'Agent not found for this tenant.'}); 
     }
 
-    let receipt = await agent.sendEth(targetDID, value); 
+    let receipt = await agent.transactWithReceipt(txDetails); 
 
-    res.send(
-        {
-            receipt:receipt
-        }
-    )
+    let uuid = uuidv4()
+    qrCodes.set(uuid, JSON.stringify(receipt))
+
+
+    res.json({
+        ...receipt,
+        qrcodeurl: "http://localhost:8000/fetch/"+uuid
+    });
 })
 
 

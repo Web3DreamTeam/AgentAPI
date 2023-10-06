@@ -59,10 +59,9 @@ export interface PharmaProductCredential {
 
 export interface ReceiptCredential {
     id:string; 
-    receiptstring:string; 
     date:string; 
     paymentMethod:string; 
-    shipToCompanyName:string;
-    sellerCompanyName:string; 
+    buyer:string;
+    seller:string; 
     total:string;
 }
