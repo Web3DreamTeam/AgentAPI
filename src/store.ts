@@ -335,18 +335,30 @@ export class Store {
 
   fetchParticipant(
     did: string,
-    type: string,
+    type: string|undefined,
     role: string
   ): Promise<VerifiedParticipantRow> {
     return new Promise((resolve, reject) => {
-      this.db.get(
-        `SELECT did, name, logo FROM VerifiedParticipants WHERE did = ? AND type = ? AND role = ?`,
-        [did, type, role],
-        (err, row: VerifiedParticipantRow) => {
-          if (err) reject(err);
-          resolve(row);
-        }
-      );
+      if (type !== undefined){
+        this.db.get(
+          `SELECT did, name, logo FROM VerifiedParticipants WHERE did = ? AND type = ? AND role = ?`,
+          [did, type, role],
+          (err, row: VerifiedParticipantRow) => {
+            if (err) reject(err);
+            resolve(row);
+          }
+        );
+      }else{
+        this.db.get(
+          `SELECT did, name, logo FROM VerifiedParticipants WHERE did = ? AND role = ?`,
+          [did, role],
+          (err, row: VerifiedParticipantRow) => {
+            if (err) reject(err);
+            resolve(row);
+          }
+        );
+      }
+      
     });
   }
 }

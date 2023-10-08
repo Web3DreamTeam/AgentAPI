@@ -267,9 +267,10 @@ app.post("/trust-registry/participant", async (req, res) => {
 
 app.get("/trust-registry/participant", async (req, res) => {
   const { did, type, role } = req.query;
-  let participant = await store.fetchParticipant(
+  let participant
+  participant = await store.fetchParticipant(
     did as string,
-    type as string,
+    type as string|undefined,
     role as string
   );
   res.send(participant);
