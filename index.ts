@@ -67,7 +67,7 @@ app.get('/discover/:username', async (req,res ) => {
 
 // Register a new agent for a tenant
 app.post('/register', async (req, res) => {
-    const { username, password, type=undefined } = req.body;
+    const { username, password, type="ethr" } = req.body;
 
     const agent = new Agent(store);
     await agent.register(username, password, type);
