@@ -65,3 +65,17 @@ export interface ReceiptCredential {
     seller:string; 
     total:string;
 }
+
+export interface ReusableKYCCredential { 
+    firstName:string; 
+    lastName:string; 
+    dateOfBirth:string; 
+    address:string; 
+    country:string;
+    state:string;
+    city:string
+    zipCode:string;
+    jobTitle:string; 
+    employerName:string; 
+    salary:string;
+}
