@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jpmorganchase/onyx-ssi-sdk": "file:../onyx-ssi-sdk",
+    "@jpmorganchase/onyx-ssi-sdk": "file:../onyx-ssi-sdk-1",
     "@types/express": "^4.17.17",
     "@types/node": "^20.5.7",
     "cors": "^2.8.5",
