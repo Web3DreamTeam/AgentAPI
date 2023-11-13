@@ -4,7 +4,6 @@ import { getResolver as getKeyResolver} from 'key-did-resolver';
 import { getResolver as getEthrResolver } from 'ethr-did-resolver';
 import { Resolver } from 'did-resolver'
 import { Store } from './store';
-import { unescapeLeadingUnderscores } from 'typescript';
 import { IAgent, IssuanceMessage, PresentationMessage, PresentationRequestMessage } from './interface/IAgent';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,27 +1,28 @@
 export interface UtilityContractCredential {
-    phonestring:string; 
-    startDate:string; 
-    accountHolderName:string; 
-    accountHolderAddress:string; 
-    accountstring:string; 
+    phoneNumber:string; 
+    name:string; 
+    address:string; 
+    country:string;
+    state:string;
+    city:string
+    zipCode:string;
+    accountNumber:string; 
     companyName: string; 
 }
 
 export interface PassportCredential {
     firstName:string; 
     lastName:string; 
-    issueDate:string; 
-    expiryDate:string; 
     dateOfBirth:string; 
     nationality:string; 
     issuanceCountry:string; 
-    passportstring:string; 
+    passportNumber:string; 
+    gender:string;
 }
 
 export interface EmploymentCredential {
     firstName:string; 
     lastName:string; 
-    startDate:string;
     jobTitle:string; 
     employerName:string; 
     employerAddress:string; 
@@ -29,17 +30,16 @@ export interface EmploymentCredential {
 }
 
 export interface BusinessLicenceCredential {
-    businessLegalName: string; 
-    taxIdentificationstring:string; 
-    issueDate:string; 
-    licensestring:string; 
+    legalName: string; 
+    taxIdentificationNumber:string; 
+    licenseNumber:string; 
     mailingAddress:string; 
     city:string;
     zipCode:string; 
 }
 
-export interface IncomeYearlyStatementCredential {
-    businessLegalName:string; 
+export interface IncomeStatementCredential {
+    legalName:string; 
     statementId: string; 
     year:string; 
     grossProfit:string;
@@ -64,4 +64,18 @@ export interface ReceiptCredential {
     buyer:string;
     seller:string; 
     total:string;
+}
+
+export interface ReusableKYCCredential { 
+    firstName:string; 
+    lastName:string; 
+    dateOfBirth:string; 
+    address:string; 
+    country:string;
+    state:string;
+    city:string
+    zipCode:string;
+    jobTitle:string; 
+    employerName:string; 
+    salary:string;
 }
