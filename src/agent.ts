@@ -338,8 +338,8 @@ export class Agent implements IAgent {
     }
 
     async createPresentationFromSDJWT(credentials: string[], claims: string[][]){
-        console.log(credentials)
-        console.log(claims)
+        console.log('agent341 ', credentials)
+        console.log('agent342 ',claims)
         return await createAndSignPresentationSDJWT(this.didWithKeys, credentials, claims)
     }
 
